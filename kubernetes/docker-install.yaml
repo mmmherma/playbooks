@@ -1,0 +1,63 @@
+-
+  name: Docker install on Ubuntu 18.04 server
+  hosts: kube-lab
+  tasks:
+    - name: Update system
+      become: yes
+      apt:
+        update_cache: yes
+
+    - name: Upgrade system
+      become: yes
+      apt:
+        upgrade: dist
+
+    - name: Remove previous Docker install
+      become: yes
+      apt:
+        name: '{{ item }}'
+        state: absent
+      with_items:
+        - docker
+        - docker-engine
+        - docker.io
+        - containerd
+        - runc
+
+    - name: Update system
+      become: yes
+      apt:
+        update_cache: yes
+
+    - name: Install Docker dependencies
+      become: yes
+      apt:
+        name: '{{ item }}'
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg-agent
+        - software-properties-common
+
+    - name: cURL key
+      become: yes
+      shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+
+    - name: Add repository to sources list
+      become: yes
+      shell: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+    - name: Update system
+      become: yes
+      apt:
+        update_cache: yes
+
+    - name: Install Docker
+      become: yes
+      apt:
+        name: '{{ item }}'
+      with_items:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io

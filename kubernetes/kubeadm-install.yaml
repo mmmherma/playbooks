@@ -1,0 +1,53 @@
+-
+  name: Kubeadm install on Ubuntu 18.04 server
+  hosts: kube-lab
+  tasks:
+    - name: Update system
+      become: yes
+      apt:
+        update_cache: yes
+
+    - name: Upgrade system
+      become: yes
+      apt:
+        upgrade: dist
+
+    - name: Install kubeadm dependencies
+      become: yes
+      apt:
+        name: '{{ item }}'
+      with_items:
+        - apt-transport-https
+        - curl
+
+    - name: cURL key
+      become: yes
+      shell: curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+
+    - name: Add repository to sources list
+      become: yes
+      shell: echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" >> /etc/apt/sources.list
+
+    - name: Update system
+      become: yes
+      apt:
+        update_cache: yes
+
+    - name: Install kubeadm
+      become: yes
+      apt:
+        name: '{{ item }}'
+      with_items:
+        - kubelet
+        - kubeadm
+        - kubectl
+
+    - name: Mark packages
+      become: yes
+      dpkg_selections:
+        selection: hold
+        name: '{{ item }}'
+      with_items:
+        - kubelet  
+        - kubeadm      
+        - kubectl
